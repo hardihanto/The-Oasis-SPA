@@ -182,11 +182,7 @@
     const tanggal = document.getElementById('tanggal').value;
     const jam = document.getElementById('jam').value;
     
-    if(!nama || !wa || !tanggal || !jam) return alert('Mohon lengkapi data reservasi Anda.');
-
-    const btn = document.querySelector('button');
-    btn.innerText = 'MEMERIKSA JADWAL...';
-    btn.disabled = true;
+    if(!nama || !wa || !tanggal || !jam) return alert('Lengkapi data dahulu.');
 
     try {
         const response = await fetch('/api/booking', {
@@ -197,17 +193,14 @@
         const result = await response.json();
 
         if(response.ok) {
-            alert('Sukses! Jadwal Anda telah dikunci dan konfirmasi dikirim ke WhatsApp.');
+            alert('Sukses! Jadwal Terkunci.');
             window.location.reload();
         } else {
-            // Ini akan muncul jika jadwal sudah "Terkunci" oleh orang lain
-            alert(result.message || 'Terjadi kesalahan, silakan coba lagi.');
+            // Ini akan memunculkan alasan error yang dikirim server
+            alert('Error Server: ' + result.message);
         }
     } catch (err) {
-        alert('Gagal menghubungi sistem. Coba beberapa saat lagi.');
-    } finally {
-        btn.disabled = false;
-        btn.innerText = 'Request Appointment';
+        alert('Gagal terhubung ke API Vercel.');
     }
 }
     </script>
