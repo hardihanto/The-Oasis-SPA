@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
     if (process.env.WA_TOKEN) {
       
       // A. Pesan Konfirmasi (Langsung)
-      await sendWhatsApp(wa, `*KONFIRMASI THE OASIS*\nHalo ${nama}, reservasi Anda tanggal ${tanggal} jam ${jam} BERHASIL.`);
+await sendWhatsApp(wa, `🌿 *KONFIRMASI THE OASIS* 🌿\n\nHalo ${nama} 😊\nReservasi Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami dengan senang hati menantikan kehadiran Anda. Sampai jumpa di The Oasis ✨`);
 
       // B. Reminder 1 Jam Sebelum (Menggunakan fitur delay Fonnte)
       // Logika: Kita hitung selisih waktu sekarang dengan waktu booking, lalu dikurangi 60 menit.
