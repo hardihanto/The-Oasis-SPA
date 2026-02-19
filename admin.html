@@ -9,7 +9,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen">
 
-    <nav class="bg-white shadow-sm border-b p-4 mb-8">
+    <nav class="bg-white shadow-sm border-b p-4 mb-8 sticky top-0 z-10">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <span>🌿</span> Admin The Oasis
@@ -54,7 +54,6 @@
         const SUPABASE_URL = "https://oivvcaeqfyssnphvtojg.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pdnZjYWVxZnlzc25waHZ0b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NTk3NDAsImV4cCI6MjA4NzAzNTc0MH0.cG0WG5_TWu7ivdNVkz4BlGyugHwHIKRlQS50e9iXKwo";
         
-        // Gunakan nama variabel 'client' agar tidak bentrok dengan library 'supabase'
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function fetchBookings() {
@@ -71,7 +70,7 @@
 
             if (error) {
                 console.error(error);
-                alert("Gagal memuat data. Periksa koneksi atau database.");
+                alert("Gagal memuat data.");
                 return;
             }
 
@@ -90,17 +89,22 @@
             data.forEach(item => {
                 const cleanWA = item.client_wa.replace(/\D/g,'');
                 const row = `
-                    <tr class="hover:bg-slate-50 transition">
+                    <tr class="hover:bg-slate-50 transition" id="row-${item.id}">
                         <td class="p-4 font-medium text-slate-900">${item.client_name}</td>
                         <td class="p-4 text-slate-600">${item.client_wa}</td>
                         <td class="p-4 text-slate-600">${item.booking_date}</td>
                         <td class="p-4">
                             <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">${item.booking_time}</span>
                         </td>
-                        <td class="p-4 text-center">
-                            <a href="https://wa.me/${cleanWA}" target="_blank" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm font-bold gap-1">
-                                💬 Chat WA
-                            </a>
+                        <td class="p-4">
+                            <div class="flex items-center justify-center gap-3">
+                                <a href="https://wa.me/${cleanWA}" target="_blank" title="Chat WhatsApp" class="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412 0 6.556-5.338 11.892-11.893 11.892-1.997 0-3.951-.5-5.688-1.448l-6.309 1.656zm6.222-3.834l.363.216c1.448.86 3.12 1.315 4.831 1.315 5.228 0 9.482-4.254 9.485-9.487a9.447 9.447 0 0 0-2.774-6.706 9.476 9.476 0 0 0-6.71-2.77c-5.233 0-9.488 4.256-9.491 9.489 0 1.84.531 3.635 1.535 5.21l.238.372-.999 3.649 3.732-.979zm11.249-6.412c-.301-.15-1.779-.878-2.056-.978-.277-.1-.479-.15-.68.15-.201.3-.778.978-.953 1.178-.175.2-.351.224-.652.074-.301-.15-1.272-.469-2.422-1.496-.895-.798-1.499-1.784-1.675-2.084-.175-.3-.019-.463.131-.612.135-.134.301-.35.452-.525.15-.175.2-.3.301-.5.101-.2.051-.375-.025-.525s-.68-1.636-.931-2.241c-.244-.589-.493-.51-.68-.52h-.579c-.201 0-.528.075-.805.375-.277.3-1.056 1.033-1.056 2.516 0 1.484 1.081 2.917 1.232 3.117.15.2 2.127 3.247 5.152 4.555.719.311 1.281.497 1.719.637.722.228 1.381.196 1.9.119.58-.086 1.779-.728 2.03-1.429.251-.701.251-1.301.176-1.428-.076-.127-.277-.202-.579-.352z"/></svg>
+                                </a>
+                                <button onclick="deleteBooking('${item.id}', '${item.client_name}')" title="Selesaikan & Hapus" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -108,7 +112,25 @@
             });
         }
 
-        // Fitur Cari Nama
+        async function deleteBooking(id, name) {
+            if (confirm(`Selesaikan reservasi atas nama "${name}"?\nData akan dihapus dari daftar.`)) {
+                const { error } = await client
+                    .from('bookings')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Gagal menghapus data.");
+                    console.error(error);
+                } else {
+                    // Hapus baris dari tabel secara instan tanpa refresh
+                    const row = document.getElementById(`row-${id}`);
+                    row.style.opacity = '0';
+                    setTimeout(() => fetchBookings(), 300);
+                }
+            }
+        }
+
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#bookingTable tr');
@@ -118,7 +140,6 @@
             });
         });
 
-        // Jalankan fungsi saat halaman terbuka
         fetchBookings();
     </script>
 </body>
