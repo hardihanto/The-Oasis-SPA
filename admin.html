@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - The Oasis Spa</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <nav class="bg-white shadow-sm border-b p-4 mb-8">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">🌿 Admin The Oasis</h1>
+            <div class="space-x-4">
+                <input type="text" id="searchInput" placeholder="Cari nama..." class="border p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <button onclick="fetchBookings()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700">Refresh Data</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-4">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-600 text-sm uppercase">
+                        <th class="p-4 font-semibold">Nama Pelanggan</th>
+                        <th class="p-4 font-semibold">WhatsApp</th>
+                        <th class="p-4 font-semibold">Tanggal</th>
+                        <th class="p-4 font-semibold">Jam</th>
+                        <th class="p-4 font-semibold">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingTable" class="text-slate-700">
+                    </tbody>
+            </table>
+            <div id="loader" class="p-10 text-center text-slate-400">Memuat data reservasi...</div>
+        </div>
+    </main>
+
+    <script>
+      const password = prompt("Masukkan Password Admin:");
+if (password !== "Oasis2026") { // Ganti password sesuai keinginan Anda
+    alert("Akses Ditolak!");
+    window.location.href = "index.html"; 
+}
+        // MASUKKAN KREDENSI SUPABASE ANDA
+        const SUPABASE_URL = "URL_SUPABASE_ANDA";
+        const SUPABASE_KEY = "ANON_KEY_SUPABASE_ANDA";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function fetchBookings() {
+            document.getElementById('loader').classList.remove('hidden');
+            const { data, error } = await supabase
+                .from('bookings')
+                .select('*')
+                .order('booking_date', { ascending: false });
+
+            document.getElementById('loader').classList.add('hidden');
+
+            if (error) {
+                console.error(error);
+                alert("Gagal memuat data");
+                return;
+            }
+
+            renderTable(data);
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('bookingTable');
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = `
+                    <tr class="border-b hover:bg-slate-50 transition">
+                        <td class="p-4 font-medium">${item.client_name}</td>
+                        <td class="p-4">${item.client_wa}</td>
+                        <td class="p-4">${item.booking_date}</td>
+                        <td class="p-4">
+                            <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">${item.booking_time}</span>
+                        </td>
+                        <td class="p-4">
+                            <a href="https://wa.me/${item.client_wa.replace(/\D/g,'')}" target="_blank" class="text-emerald-600 hover:underline text-sm font-semibold italic">Hubungi via WA</a>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Fitur Cari
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#bookingTable tr');
+            rows.forEach(row => {
+                const name = row.children[0].textContent.toLowerCase();
+                row.style.display = name.includes(val) ? '' : 'none';
+            });
+        });
+
+        fetchBookings();
+    </script>
+</body>
+</html>
