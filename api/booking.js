@@ -23,24 +23,25 @@ module.exports = async (req, res) => {
       // A. Pesan Konfirmasi (Langsung)
 await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
-      // B. Perhitungan Waktu dengan Koreksi UTC ke WIB (-7 Jam)
-      const bookingDate = new Date(`${tanggal}T${jam}:00`);
-      
-      // Reminder 1 Jam Sebelum: (Booking - 1 jam) - 7 jam koreksi UTC
-      const reminderTime = new Date(bookingDate.getTime() - (8 * 60 * 60 * 1000)); 
+     // B. Buat objek waktu booking (WIB)
+      const bookingDate = new Date(`${tanggal}T${jam}:00+07:00`);
 
-      // Follow Up 7 Hari: (Booking + 7 hari) - 7 jam koreksi UTC
-      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000) - (7 * 60 * 60 * 1000));
-
-      // Kirim ke Fonnte
-      if (reminderTime > new Date(new Date().getTime() - (7 * 60 * 60 * 1000))) {
-          await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
+      // C. Reminder 1 Jam Sebelum
+      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
+      if (reminderTime > new Date()) {
+        await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
       }
-      
+
+      // D. Follow Up 7 Hari Setelah
+      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
       await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTime);
     }
 
-// ... (bagian bawah script tetap sama)
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 async function sendWhatsApp(target, message, scheduleTime = null) {
   const formData = new URLSearchParams();
@@ -48,8 +49,15 @@ async function sendWhatsApp(target, message, scheduleTime = null) {
   formData.append('message', message);
   
   if (scheduleTime) {
-    // Gunakan format ISO yang sudah dimodifikasi untuk Fonnte
-    const formattedDate = scheduleTime.toISOString().replace('T', ' ').substring(0, 19);
+    // FORMAT TANGGAL YANG PASTI DITERIMA FONNTE SEBAGAI WIB
+    const year = scheduleTime.toLocaleString("en-ID", {year: 'numeric', timeZone: "Asia/Jakarta"});
+    const month = scheduleTime.toLocaleString("en-ID", {month: '2-digit', timeZone: "Asia/Jakarta"});
+    const day = scheduleTime.toLocaleString("en-ID", {day: '2-digit', timeZone: "Asia/Jakarta"});
+    const hour = scheduleTime.toLocaleString("en-ID", {hour: '2-digit', hour12: false, timeZone: "Asia/Jakarta"});
+    const minute = scheduleTime.toLocaleString("en-ID", {minute: '2-digit', timeZone: "Asia/Jakarta"});
+    
+    // Hasilnya: YYYY-MM-DD HH:mm:00
+    const formattedDate = `${year}-${month}-${day} ${hour}:${minute}:00`;
     formData.append('schedule', formattedDate);
   }
 
