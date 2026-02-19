@@ -11,16 +11,18 @@
 
     <nav class="bg-white shadow-sm border-b p-4 mb-8">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold text-slate-800">🌿 Admin The Oasis</h1>
-            <div class="space-x-4">
-                <input type="text" id="searchInput" placeholder="Cari nama..." class="border p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <button onclick="fetchBookings()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700">Refresh Data</button>
+            <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <span>🌿</span> Admin The Oasis
+            </h1>
+            <div class="flex gap-2">
+                <input type="text" id="searchInput" placeholder="Cari nama..." class="border p-2 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <button onclick="fetchBookings()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-emerald-700 transition">Refresh</button>
             </div>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-4">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-100 text-slate-600 text-sm uppercase">
@@ -28,39 +30,48 @@
                         <th class="p-4 font-semibold">WhatsApp</th>
                         <th class="p-4 font-semibold">Tanggal</th>
                         <th class="p-4 font-semibold">Jam</th>
-                        <th class="p-4 font-semibold">Aksi</th>
+                        <th class="p-4 font-semibold text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="bookingTable" class="text-slate-700">
+                <tbody id="bookingTable" class="text-slate-700 divide-y">
                     </tbody>
             </table>
-            <div id="loader" class="p-10 text-center text-slate-400">Memuat data reservasi...</div>
+            <div id="loader" class="p-10 text-center text-slate-400">
+                Memproses data...
+            </div>
         </div>
     </main>
 
     <script>
-      const password = prompt("Masukkan Password Admin:");
-if (password !== "Oasis2026") { // Ganti password sesuai keinginan Anda
-    alert("Akses Ditolak!");
-    window.location.href = "index.html"; 
-}
-        // MASUKKAN KREDENSI SUPABASE ANDA
+        // 1. SISTEM LOGIN SEDERHANA
+        const passAdmin = prompt("Masukkan Password Admin:");
+        if (passAdmin !== "Oasis2026") { 
+            alert("Akses Ditolak!");
+            window.location.href = "index.html"; 
+        }
+
+        // 2. KONFIGURASI SUPABASE
         const SUPABASE_URL = "https://oivvcaeqfyssnphvtojg.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pdnZjYWVxZnlzc25waHZ0b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NTk3NDAsImV4cCI6MjA4NzAzNTc0MH0.cG0WG5_TWu7ivdNVkz4BlGyugHwHIKRlQS50e9iXKwo";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Gunakan nama variabel 'client' agar tidak bentrok dengan library 'supabase'
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function fetchBookings() {
-            document.getElementById('loader').classList.remove('hidden');
-            const { data, error } = await supabase
+            const loader = document.getElementById('loader');
+            loader.classList.remove('hidden');
+
+            const { data, error } = await client
                 .from('bookings')
                 .select('*')
-                .order('booking_date', { ascending: false });
+                .order('booking_date', { ascending: false })
+                .order('booking_time', { ascending: false });
 
-            document.getElementById('loader').classList.add('hidden');
+            loader.classList.add('hidden');
 
             if (error) {
                 console.error(error);
-                alert("Gagal memuat data");
+                alert("Gagal memuat data. Periksa koneksi atau database.");
                 return;
             }
 
@@ -71,17 +82,25 @@ if (password !== "Oasis2026") { // Ganti password sesuai keinginan Anda
             const tableBody = document.getElementById('bookingTable');
             tableBody.innerHTML = '';
 
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-slate-400">Belum ada reservasi.</td></tr>';
+                return;
+            }
+
             data.forEach(item => {
+                const cleanWA = item.client_wa.replace(/\D/g,'');
                 const row = `
-                    <tr class="border-b hover:bg-slate-50 transition">
-                        <td class="p-4 font-medium">${item.client_name}</td>
-                        <td class="p-4">${item.client_wa}</td>
-                        <td class="p-4">${item.booking_date}</td>
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-4 font-medium text-slate-900">${item.client_name}</td>
+                        <td class="p-4 text-slate-600">${item.client_wa}</td>
+                        <td class="p-4 text-slate-600">${item.booking_date}</td>
                         <td class="p-4">
-                            <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">${item.booking_time}</span>
+                            <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">${item.booking_time}</span>
                         </td>
-                        <td class="p-4">
-                            <a href="https://wa.me/${item.client_wa.replace(/\D/g,'')}" target="_blank" class="text-emerald-600 hover:underline text-sm font-semibold italic">Hubungi via WA</a>
+                        <td class="p-4 text-center">
+                            <a href="https://wa.me/${cleanWA}" target="_blank" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 text-sm font-bold gap-1">
+                                💬 Chat WA
+                            </a>
                         </td>
                     </tr>
                 `;
@@ -89,16 +108,17 @@ if (password !== "Oasis2026") { // Ganti password sesuai keinginan Anda
             });
         }
 
-        // Fitur Cari
+        // Fitur Cari Nama
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#bookingTable tr');
             rows.forEach(row => {
-                const name = row.children[0].textContent.toLowerCase();
+                const name = row.children[0]?.textContent.toLowerCase() || "";
                 row.style.display = name.includes(val) ? '' : 'none';
             });
         });
 
+        // Jalankan fungsi saat halaman terbuka
         fetchBookings();
     </script>
 </body>
