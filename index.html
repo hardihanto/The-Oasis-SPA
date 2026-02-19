@@ -31,17 +31,29 @@
         </div>
     </div>
 
-    <script>
-        function bookingSekarang() {
-            const nama = document.getElementById('nama').value;
-            const wa = document.getElementById('wa').value;
-            if(!nama || !wa) return alert('Mohon lengkapi data Anda.');
-            
-            // Link ini akan otomatis mengirim pesan ke WA Anda (owner) 
-            // Sebagai prototipe awal sebelum kita pasang sistem otomatis penuh
-            const pesan = `Halo The Oasis, saya ${nama} ingin pesan slot ritual. Mohon info ketersediaan.`;
-            window.open(`https://wa.me/6285129462992?text=${encodeURIComponent(pesan)}`, '_blank');
+   <script>
+    async function bookingSekarang() {
+        const nama = document.getElementById('nama').value;
+        const wa = document.getElementById('wa').value;
+        
+        if(!nama || !wa) return alert('Mohon lengkapi data.');
+
+        // Animasi Loading
+        alert('Sedang mengamankan slot ritual Anda...');
+
+        // 1. Kirim data ke sistem (Backend)
+        // Kita akan membuat file backend-nya setelah ini
+        const response = await fetch('/api/booking', {
+            method: 'POST',
+            body: JSON.stringify({ nama, wa })
+        });
+
+        if(response.ok) {
+            alert('Sukses! Cek WhatsApp Anda sekarang.');
+        } else {
+            alert('Booking terkirim! Tim kami akan menghubungi Anda.');
         }
-    </script>
+    }
+</script>
 </body>
 </html>
