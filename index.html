@@ -3,104 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE OASIS | Private Sanctuary</title>
+    <title>THE OASIS | Luxury Private Sanctuary</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@1,400;1,700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@1,400;1,700&family=Inter:wght@200;400;600&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background: #0a0a0a; 
-            color: #ffffff; 
-            font-family: 'Inter', sans-serif;
-            background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
-        }
+        :root { --gold: #c5a059; --dark: #050505; }
+        body { background-color: var(--dark); color: #fff; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .font-luxury { font-family: 'Bodoni Moda', serif; }
-        .gold-gradient {
-            background: linear-gradient(135deg, #c5a059 0%, #f1e2af 50%, #a37e37 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .gold-button {
-            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
-            box-shadow: 0 10px 30px rgba(191, 149, 63, 0.2);
-        }
-        .gold-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(191, 149, 63, 0.4);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .gold-text { background: linear-gradient(to right, #bf953f, #fcf6ba, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .hero-gradient { background: radial-gradient(circle at center, #1a150a 0%, #050505 100%); }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6 overflow-hidden">
-    
-    <div class="max-w-md w-full text-center space-y-12 animate-fadeIn">
-        <div class="space-y-2">
-            <h1 class="font-luxury text-7xl italic gold-gradient">The Oasis</h1>
-            <p class="text-[10px] tracking-[0.6em] uppercase opacity-40 font-light">Private Ritual Booking</p>
+<body>
+
+    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center border-b border-white/5 backdrop-blur-md">
+        <span class="font-luxury italic text-2xl tracking-tighter gold-text">The Oasis</span>
+        <div class="hidden md:flex gap-8 text-[10px] uppercase tracking-[0.3em] opacity-60">
+            <a href="#rituals" class="hover:opacity-100 transition">Rituals</a>
+            <a href="#about" class="hover:opacity-100 transition">Sanctuary</a>
+            <a href="#booking" class="hover:opacity-100 transition text-[#c5a059]">Reserve Now</a>
         </div>
+    </nav>
 
-        <div class="glass-card p-10 rounded-3xl space-y-8 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#bf953f] to-transparent opacity-30"></div>
-            
-            <div class="space-y-6 text-left">
-                <div class="group">
-                    <label class="text-[10px] uppercase tracking-widest text-[#bf953f] mb-2 block font-semibold">Nama Tamu</label>
-                    <input type="text" id="nama" placeholder="Masukkan nama Anda" 
-                        class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-[#bf953f] transition-all duration-500 placeholder:text-white/10">
-                </div>
-
-                <div class="group">
-                    <label class="text-[10px] uppercase tracking-widest text-[#bf953f] mb-2 block font-semibold">WhatsApp</label>
-                    <input type="tel" id="wa" placeholder="0812..." 
-                        class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-[#bf953f] transition-all duration-500 placeholder:text-white/10">
-                </div>
+    <section class="h-screen flex flex-col items-center justify-center text-center px-6 hero-gradient">
+        <div class="space-y-4 animate-fadeIn">
+            <h2 class="text-[10px] tracking-[0.8em] uppercase opacity-40">Escape the Ordinary</h2>
+            <h1 class="font-luxury text-7xl md:text-9xl italic gold-text py-4">Reborn.</h1>
+            <p class="max-w-lg mx-auto text-sm font-light opacity-60 leading-relaxed tracking-wide">
+                Sanctuary pribadi di tengah hiruk pikuk kota. Temukan kembali ketenangan jiwa melalui ritual kuno yang dipadukan dengan kemewahan modern.
+            </p>
+            <div class="pt-10">
+                <a href="#booking" class="px-12 py-5 border border-[#bf953f] text-[#bf953f] text-[10px] uppercase tracking-[0.4em] hover:bg-[#bf953f] hover:text-black transition-all duration-700">
+                    Mulai Ritual Anda
+                </a>
             </div>
-
-            <button onclick="bookingSekarang()" 
-                class="gold-button w-full text-black font-bold py-5 rounded-full tracking-[0.3em] uppercase text-[10px] transition-all duration-500 transform active:scale-95">
-                Amankan Slot Ritual
-            </button>
-            
-            <p class="text-[9px] opacity-30 italic">Hanya tersedia 3 slot eksklusif setiap harinya.</p>
         </div>
+    </section>
 
-        <div class="pt-8 opacity-20">
-            <p class="text-[10px] tracking-widest uppercase">Karawang &bull; Jakarta &bull; Bali</p>
+    <section id="rituals" class="py-32 px-8 max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-3 gap-12">
+            <div class="space-y-6 group">
+                <div class="h-[400px] bg-zinc-900 overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-1000">
+                </div>
+                <h3 class="font-luxury text-2xl italic">Neural Reset</h3>
+                <p class="text-xs opacity-50 leading-loose uppercase tracking-widest">90 Menit &bull; Deep Tissue & Hot Stones</p>
+            </div>
+            <div class="space-y-6 group">
+                <div class="h-[400px] bg-zinc-900 overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-1000">
+                </div>
+                <h3 class="font-luxury text-2xl italic">Oceanic Flow</h3>
+                <p class="text-xs opacity-50 leading-loose uppercase tracking-widest">120 Menit &bull; Salt Scrub & Oil Ritual</p>
+            </div>
+            <div class="space-y-6 group">
+                <div class="h-[400px] bg-zinc-900 overflow-hidden rounded-sm">
+                    <img src="https://images.unsplash.com/photo-1519415387722-a1c3bbef716c?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-1000">
+                </div>
+                <h3 class="font-luxury text-2xl italic">The Sovereign</h3>
+                <p class="text-xs opacity-50 leading-loose uppercase tracking-widest">180 Menit &bull; Full Body & Facial VVIP</p>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section id="booking" class="py-32 bg-black/40">
+        <div class="max-w-xl mx-auto px-6 text-center">
+            <div class="glass p-12 rounded-3xl space-y-10 relative overflow-hidden">
+                <div class="space-y-4">
+                    <h2 class="font-luxury text-4xl italic gold-text">Secure Your Presence</h2>
+                    <p class="text-[10px] tracking-widest opacity-40 uppercase">Hanya 3 Slot Tersedia Setiap Hari</p>
+                </div>
+                
+                <form class="text-left space-y-6">
+                    <div class="border-b border-white/10 py-2">
+                        <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f]">Nama Tamu</label>
+                        <input type="text" id="nama" class="w-full bg-transparent outline-none py-2 font-light placeholder:opacity-20" placeholder="Your Name">
+                    </div>
+                    <div class="border-b border-white/10 py-2">
+                        <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f]">WhatsApp</label>
+                        <input type="tel" id="wa" class="w-full bg-transparent outline-none py-2 font-light placeholder:opacity-20" placeholder="0812...">
+                    </div>
+                    <button type="button" onclick="bookingSekarang()" class="w-full bg-white text-black py-5 text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-[#bf953f] hover:text-white transition duration-500">
+                        Amankan Slot Ritual
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 text-center opacity-20 text-[9px] tracking-[0.6em] uppercase">
+        The Oasis Sanctuary &bull; Managed by Oasis SaaS
+    </footer>
 
     <script>
         async function bookingSekarang() {
             const nama = document.getElementById('nama').value;
             const wa = document.getElementById('wa').value;
-            
-            if(!nama || !wa) return alert('Mohon lengkapi data ritual Anda.');
+            if(!nama || !wa) return alert('Data tidak lengkap.');
 
-            const btn = document.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = 'MEMPROSES RITUAL...';
-            btn.disabled = true;
+            const response = await fetch('/api/booking', {
+                method: 'POST',
+                body: JSON.stringify({ nama, wa })
+            });
 
-            try {
-                const response = await fetch('/api/booking', {
-                    method: 'POST',
-                    body: JSON.stringify({ nama, wa })
-                });
-
-                if(response.ok) {
-                    alert('Sukses! Undangan VVIP telah dikirim ke WhatsApp Anda.');
-                    window.location.reload();
-                } else {
-                    alert('Berhasil mengamankan slot! Mohon tunggu konfirmasi.');
-                }
-            } catch (err) {
-                alert('Sistem sedang penuh, mohon coba sesaat lagi.');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
+            if(response.ok) {
+                alert('Konfirmasi VVIP telah dikirim ke WhatsApp Anda.');
+            } else {
+                alert('Berhasil! Tim kami akan menghubungi Anda.');
             }
         }
     </script>
