@@ -20,21 +20,24 @@ module.exports = async (req, res) => {
 
     // 2. Logika WhatsApp
     if (process.env.WA_TOKEN) {
-     // A. Pesan Konfirmasi (Langsung)
+      // A. Pesan Konfirmasi (Langsung)
 await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
-      // B. Buat objek waktu (Tambahkan +07:00 agar Vercel tahu ini WIB)
+      // B. Buat objek waktu (Tambahkan +07:00 agar terbaca WIB)
       const bookingDate = new Date(`${tanggal}T${jam}:00+07:00`);
 
-      // C. Reminder 1 Jam Sebelum (Booking minus 1 jam)
-      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
-      if (reminderTime > new Date()) {
-        await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
+      // C. Reminder 1 Jam Sebelum (Booking minus 3600 detik)
+      const reminderTimeInSeconds = Math.floor(bookingDate.getTime() / 1000) - 3600;
+      
+      // Kirim hanya jika waktu reminder belum lewat dari saat ini
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      if (reminderTimeInSeconds > nowInSeconds) {
+        await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTimeInSeconds);
       }
 
-      // D. Follow Up 7 Hari Setelah (Booking plus 7 hari)
-      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
-      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan. Sampai jumpa kembali!`, followUpTime);
+      // D. Follow Up 7 Hari Setelah (604800 detik)
+      const followUpTimeInSeconds = Math.floor(bookingDate.getTime() / 1000) + 604800;
+      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTimeInSeconds);
     }
 
     return res.status(200).json({ success: true });
@@ -43,25 +46,15 @@ await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo $
   }
 };
 
-// FUNGSI KIRIM FONNTE DENGAN FORMAT TANGGAL MANUAL (WIB)
-async function sendWhatsApp(target, message, scheduleDate = null) {
+// FUNGSI KIRIM FONNTE MENGGUNAKAN UNIX TIMESTAMP
+async function sendWhatsApp(target, message, unixSchedule = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
 
-  if (scheduleDate) {
-    // Kita ambil waktu Jakarta dengan menambahkan offset secara manual jika perlu, 
-    // tapi cara paling aman di Vercel adalah toLocaleString dengan format ISO
-    const jktDate = new Date(scheduleDate.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
-    
-    const Y = jktDate.getFullYear();
-    const M = String(jktDate.getMonth() + 1).padStart(2, '0');
-    const D = String(jktDate.getDate()).padStart(2, '0');
-    const h = String(jktDate.getHours()).padStart(2, '0');
-    const m = String(jktDate.getMinutes()).padStart(2, '0');
-    
-    const formattedDate = `${Y}-${M}-${D} ${h}:${m}:00`;
-    formData.append('schedule', formattedDate);
+  if (unixSchedule) {
+    // Mengirim angka detik mentah (Unix Timestamp) ke parameter schedule
+    formData.append('schedule', unixSchedule.toString());
   }
 
   await fetch('https://api.fonnte.com/send', {
