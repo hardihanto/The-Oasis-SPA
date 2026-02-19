@@ -1,59 +1,108 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE OASIS | Private Sanctuary</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital@1&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@1,400;1,700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
+        body { 
+            background: #0a0a0a; 
+            color: #ffffff; 
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%);
+        }
         .font-luxury { font-family: 'Bodoni Moda', serif; }
-        .gold-bg { background: linear-gradient(to right, #bf953f, #fcf6ba, #aa771c); }
+        .gold-gradient {
+            background: linear-gradient(135deg, #c5a059 0%, #f1e2af 50%, #a37e37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-button {
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);
+            box-shadow: 0 10px 30px rgba(191, 149, 63, 0.2);
+        }
+        .gold-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(191, 149, 63, 0.4);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-6">
-    <div class="max-w-md w-full text-center space-y-12">
-        <h1 class="font-luxury text-6xl italic text-[#A68942]">The Oasis</h1>
-        <p class="text-[10px] tracking-[0.5em] uppercase opacity-50">Private Ritual Booking</p>
-        
-        <div class="space-y-6 text-left bg-zinc-900/50 p-8 rounded-2xl border border-white/5">
-            <div>
-                <label class="text-[10px] uppercase tracking-widest opacity-40">Nama Tamu</label>
-                <input type="text" id="nama" class="w-full bg-black border border-white/10 p-4 mt-2 outline-none focus:border-[#A68942]">
+<body class="flex items-center justify-center min-h-screen p-6 overflow-hidden">
+    
+    <div class="max-w-md w-full text-center space-y-12 animate-fadeIn">
+        <div class="space-y-2">
+            <h1 class="font-luxury text-7xl italic gold-gradient">The Oasis</h1>
+            <p class="text-[10px] tracking-[0.6em] uppercase opacity-40 font-light">Private Ritual Booking</p>
+        </div>
+
+        <div class="glass-card p-10 rounded-3xl space-y-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#bf953f] to-transparent opacity-30"></div>
+            
+            <div class="space-y-6 text-left">
+                <div class="group">
+                    <label class="text-[10px] uppercase tracking-widest text-[#bf953f] mb-2 block font-semibold">Nama Tamu</label>
+                    <input type="text" id="nama" placeholder="Masukkan nama Anda" 
+                        class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-[#bf953f] transition-all duration-500 placeholder:text-white/10">
+                </div>
+
+                <div class="group">
+                    <label class="text-[10px] uppercase tracking-widest text-[#bf953f] mb-2 block font-semibold">WhatsApp</label>
+                    <input type="tel" id="wa" placeholder="0812..." 
+                        class="w-full bg-transparent border-b border-white/10 py-3 outline-none focus:border-[#bf953f] transition-all duration-500 placeholder:text-white/10">
+                </div>
             </div>
-            <div>
-                <label class="text-[10px] uppercase tracking-widest opacity-40">WhatsApp (Contoh: 0812...)</label>
-                <input type="tel" id="wa" class="w-full bg-black border border-white/10 p-4 mt-2 outline-none focus:border-[#A68942]">
-            </div>
-            <button onclick="bookingSekarang()" class="w-full gold-bg text-black font-bold py-5 tracking-[0.3em] uppercase text-xs hover:scale-105 transition duration-500">
+
+            <button onclick="bookingSekarang()" 
+                class="gold-button w-full text-black font-bold py-5 rounded-full tracking-[0.3em] uppercase text-[10px] transition-all duration-500 transform active:scale-95">
                 Amankan Slot Ritual
             </button>
+            
+            <p class="text-[9px] opacity-30 italic">Hanya tersedia 3 slot eksklusif setiap harinya.</p>
+        </div>
+
+        <div class="pt-8 opacity-20">
+            <p class="text-[10px] tracking-widest uppercase">Karawang &bull; Jakarta &bull; Bali</p>
         </div>
     </div>
 
-   <script>
-    async function bookingSekarang() {
-        const nama = document.getElementById('nama').value;
-        const wa = document.getElementById('wa').value;
-        
-        if(!nama || !wa) return alert('Mohon lengkapi data.');
+    <script>
+        async function bookingSekarang() {
+            const nama = document.getElementById('nama').value;
+            const wa = document.getElementById('wa').value;
+            
+            if(!nama || !wa) return alert('Mohon lengkapi data ritual Anda.');
 
-        // Animasi Loading
-        alert('Sedang mengamankan slot ritual Anda...');
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'MEMPROSES RITUAL...';
+            btn.disabled = true;
 
-        // 1. Kirim data ke sistem (Backend)
-        // Kita akan membuat file backend-nya setelah ini
-        const response = await fetch('/api/booking', {
-            method: 'POST',
-            body: JSON.stringify({ nama, wa })
-        });
+            try {
+                const response = await fetch('/api/booking', {
+                    method: 'POST',
+                    body: JSON.stringify({ nama, wa })
+                });
 
-        if(response.ok) {
-            alert('Sukses! Cek WhatsApp Anda sekarang.');
-        } else {
-            alert('Booking terkirim! Tim kami akan menghubungi Anda.');
+                if(response.ok) {
+                    alert('Sukses! Undangan VVIP telah dikirim ke WhatsApp Anda.');
+                    window.location.reload();
+                } else {
+                    alert('Berhasil mengamankan slot! Mohon tunggu konfirmasi.');
+                }
+            } catch (err) {
+                alert('Sistem sedang penuh, mohon coba sesaat lagi.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
