@@ -165,34 +165,40 @@
     </footer>
 
     <script>
-        async function bookingSekarang() {
-            const nama = document.getElementById('nama').value;
-            const wa = document.getElementById('wa').value;
-            if(!nama || !wa) return alert('Silakan lengkapi data kunjungan Anda.');
+       async function bookingSekarang() {
+    const nama = document.getElementById('nama').value;
+    const wa = document.getElementById('wa').value;
+    const tanggal = document.getElementById('tanggal').value;
+    const jam = document.getElementById('jam').value;
+    
+    if(!nama || !wa || !tanggal || !jam) return alert('Mohon lengkapi data reservasi Anda.');
 
-            const btn = document.querySelector('button');
-            btn.innerText = 'MEMPROSES REQUEST...';
-            btn.disabled = true;
+    const btn = document.querySelector('button');
+    btn.innerText = 'MEMERIKSA JADWAL...';
+    btn.disabled = true;
 
-            try {
-                const response = await fetch('/api/booking', {
-                    method: 'POST',
-                    body: JSON.stringify({ nama, wa })
-                });
+    try {
+        const response = await fetch('/api/booking', {
+            method: 'POST',
+            body: JSON.stringify({ nama, wa, tanggal, jam })
+        });
 
-                if(response.ok) {
-                    alert('Sukses. Tim Concierge kami telah mengirimkan detail konfirmasi ke WhatsApp Anda.');
-                    window.location.reload();
-                } else {
-                    alert('Terima kasih. Permintaan Anda telah tersimpan.');
-                }
-            } catch (err) {
-                alert('Jaringan sibuk, silakan coba beberapa saat lagi.');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'REQUEST APPOINTMENT';
-            }
+        const result = await response.json();
+
+        if(response.ok) {
+            alert('Sukses! Jadwal Anda telah dikunci dan konfirmasi dikirim ke WhatsApp.');
+            window.location.reload();
+        } else {
+            // Ini akan muncul jika jadwal sudah "Terkunci" oleh orang lain
+            alert(result.message || 'Terjadi kesalahan, silakan coba lagi.');
         }
+    } catch (err) {
+        alert('Gagal menghubungi sistem. Coba beberapa saat lagi.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Request Appointment';
+    }
+}
     </script>
 </body>
 </html>
