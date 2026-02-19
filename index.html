@@ -176,31 +176,52 @@
     </footer>
 
     <script>
-       async function bookingSekarang() {
+     async function bookingSekarang() {
+    // 1. Ambil data dari input
     const nama = document.getElementById('nama').value;
     const wa = document.getElementById('wa').value;
     const tanggal = document.getElementById('tanggal').value;
     const jam = document.getElementById('jam').value;
     
-    if(!nama || !wa || !tanggal || !jam) return alert('Lengkapi data dahulu.');
+    // 2. Validasi sederhana
+    if(!nama || !wa || !tanggal || !jam) {
+        return alert('Mohon lengkapi jadwal reservasi Anda.');
+    }
+
+    const btn = document.querySelector('button');
+    btn.innerText = 'SEDANG MENGUNCI JADWAL...';
+    btn.disabled = true;
 
     try {
+        // 3. Kirim data ke API Vercel yang sudah aktif
         const response = await fetch('/api/booking', {
             method: 'POST',
-            body: JSON.stringify({ nama, wa, tanggal, jam })
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                nama: nama, 
+                wa: wa, 
+                tanggal: tanggal, 
+                jam: jam 
+            })
         });
 
         const result = await response.json();
 
-        if(response.ok) {
-            alert('Sukses! Jadwal Terkunci.');
+        if (response.ok && result.success) {
+            alert('RESERVASI BERHASIL! Jadwal Anda telah dikunci.');
             window.location.reload();
         } else {
-            // Ini akan memunculkan alasan error yang dikirim server
-            alert('Error Server: ' + result.message);
+            // Menampilkan pesan jika jadwal sudah penuh atau error lainnya
+            alert('GAGAL: ' + (result.message || 'Terjadi kesalahan sistem.'));
         }
     } catch (err) {
-        alert('Gagal terhubung ke API Vercel.');
+        console.error('Error:', err);
+        alert('Gagal terhubung ke sistem. Pastikan koneksi internet Anda stabil.');
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'REQUEST APPOINTMENT';
     }
 }
     </script>
