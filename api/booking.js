@@ -31,22 +31,20 @@ module.exports = async (req, res) => {
 
     // 3. LOGIKA OTOMATISASI WHATSAPP
     if (process.env.WA_TOKEN) {
-     // A. Pesan Konfirmasi (Langsung)
-await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
+      // A. Konfirmasi Langsung
+      await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama}\nReservasi Anda tanggal ${tanggal} jam ${jam} BERHASIL.\nSampai jumpa! ✨`);
 
-      // B. Reminder 1 Jam Sebelum
-      // Menghitung waktu kirim: Waktu booking dikurangi 1 jam
-      const bookingTime = new Date(`${tanggal} ${jam}`);
-      const reminderTime = new Date(bookingTime.getTime() - (60 * 60 * 1000));
+      // B. Reminder 1 Jam Sebelum (WIB)
+      const bookingDate = new Date(`${tanggal}T${jam}:00`); // Format ISO Local
+      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
       
-      // Kirim hanya jika waktu reminder masih di masa depan
       if (reminderTime > new Date()) {
         await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
       }
 
       // C. Follow Up 7 Hari Setelah
-      const followUpTime = new Date(bookingTime.getTime() + (7 * 24 * 60 * 60 * 1000));
-      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan. Sampai jumpa kembali!`, followUpTime);
+      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
+      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTime);
     }
 
     return res.status(200).json({ success: true });
@@ -55,15 +53,23 @@ await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo $
   }
 };
 
+// FUNGSI KIRIM DENGAN FORMAT WAKTU LOKAL (WIB)
 async function sendWhatsApp(target, message, scheduleTime = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
-  
-  // Jika ada jadwal, gunakan parameter 'schedule' (format Fonnte untuk waktu spesifik)
+  formData.append('countryCode', '62'); // Opsional: Memastikan kode negara Indonesia
+
   if (scheduleTime) {
-    // Format: YYYY-MM-DD HH:MM:SS
-    const formattedDate = scheduleTime.toISOString().replace('T', ' ').substring(0, 19);
+    // MENGUBAH KE FORMAT WIB (YYYY-MM-DD HH:MM:SS) Tanpa ISO/UTC
+    const year = scheduleTime.getFullYear();
+    const month = String(scheduleTime.getMonth() + 1).padStart(2, '0');
+    const day = String(scheduleTime.getDate()).padStart(2, '0');
+    const hours = String(scheduleTime.getHours()).padStart(2, '0');
+    const minutes = String(scheduleTime.getMinutes()).padStart(2, '0');
+    const seconds = String(scheduleTime.getSeconds()).padStart(2, '0');
+    
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     formData.append('schedule', formattedDate);
   }
 
