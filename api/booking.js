@@ -58,19 +58,12 @@ async function sendWhatsApp(target, message, scheduleTime = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
-  formData.append('countryCode', '62'); // Opsional: Memastikan kode negara Indonesia
-
+  
   if (scheduleTime) {
-    // MENGUBAH KE FORMAT WIB (YYYY-MM-DD HH:MM:SS) Tanpa ISO/UTC
-    const year = scheduleTime.getFullYear();
-    const month = String(scheduleTime.getMonth() + 1).padStart(2, '0');
-    const day = String(scheduleTime.getDate()).padStart(2, '0');
-    const hours = String(scheduleTime.getHours()).padStart(2, '0');
-    const minutes = String(scheduleTime.getMinutes()).padStart(2, '0');
-    const seconds = String(scheduleTime.getSeconds()).padStart(2, '0');
-    
-    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    formData.append('schedule', formattedDate);
+    // Format Fonnte yang paling stabil: Unix Timestamp (detik)
+    // Kita ubah waktu tujuan menjadi hitungan detik
+    const unixTimestamp = Math.floor(scheduleTime.getTime() / 1000);
+    formData.append('schedule', unixTimestamp); 
   }
 
   await fetch('https://api.fonnte.com/send', {
