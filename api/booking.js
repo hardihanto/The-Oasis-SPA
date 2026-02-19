@@ -15,36 +15,30 @@ module.exports = async (req, res) => {
   try {
     const { nama, wa, tanggal, jam } = req.body;
 
-    // 1. Cek Bentrok
-    const { data: existing } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('booking_date', tanggal)
-      .eq('booking_time', jam);
-
-    if (existing && existing.length > 0) {
-      return res.status(400).json({ success: false, message: 'Jam sudah terisi.' });
-    }
-
-    // 2. Simpan ke Database
+    // 1. Simpan ke Database
     await supabase.from('bookings').insert([{ client_name: nama, client_wa: wa, booking_date: tanggal, booking_time: jam }]);
 
-    // 3. LOGIKA OTOMATISASI WHATSAPP
+    // 2. Logika WhatsApp
     if (process.env.WA_TOKEN) {
       // A. Pesan Konfirmasi (Langsung)
 await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
-      // B. Reminder 1 Jam Sebelum (WIB)
-      const bookingDate = new Date(`${tanggal}T${jam}:00`); // Format ISO Local
-      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
+      // B. Pecah tanggal dan jam untuk perhitungan manual (WIB)
+      const [year, month, day] = tanggal.split('-').map(Number);
+      const [hour, minute] = jam.split(':').map(Number);
       
+      // Buat objek waktu booking dalam konteks waktu lokal
+      const bookingDate = new Date(year, month - 1, day, hour, minute);
+
+      // C. Reminder 1 Jam Sebelum
+      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
       if (reminderTime > new Date()) {
         await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
       }
 
-      // C. Follow Up 7 Hari Setelah
+      // D. Follow Up 7 Hari Setelah
       const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
-      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTime);
+      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan. Sampai jumpa kembali!`, followUpTime);
     }
 
     return res.status(200).json({ success: true });
@@ -53,17 +47,23 @@ await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo $
   }
 };
 
-// FUNGSI KIRIM DENGAN FORMAT WAKTU LOKAL (WIB)
+// FUNGSI PENGIRIMAN DENGAN FORMAT TANGGAL MANUAL (MENCEGAH SELISIH 7 JAM)
 async function sendWhatsApp(target, message, scheduleTime = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
-  
+
   if (scheduleTime) {
-    // Format Fonnte yang paling stabil: Unix Timestamp (detik)
-    // Kita ubah waktu tujuan menjadi hitungan detik
-    const unixTimestamp = Math.floor(scheduleTime.getTime() / 1000);
-    formData.append('schedule', unixTimestamp); 
+    // Susun format YYYY-MM-DD HH:MM:SS secara manual agar sesuai jam Jakarta
+    const Y = scheduleTime.getFullYear();
+    const M = String(scheduleTime.getMonth() + 1).padStart(2, '0');
+    const D = String(scheduleTime.getDate()).padStart(2, '0');
+    const h = String(scheduleTime.getHours()).padStart(2, '0');
+    const m = String(scheduleTime.getMinutes()).padStart(2, '0');
+    const s = "00";
+    
+    const formattedDate = `${Y}-${M}-${D} ${h}:${m}:${s}`;
+    formData.append('schedule', formattedDate);
   }
 
   await fetch('https://api.fonnte.com/send', {
