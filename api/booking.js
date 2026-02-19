@@ -1,55 +1,60 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// Pindahkan inisialisasi ke dalam handler untuk memastikan variabel env terbaca
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
 module.exports = async (req, res) => {
-  // 1. Tambahkan Header CORS (Penting agar tidak error di browser)
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Hanya menerima POST' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Gunakan POST' });
 
   try {
-    // Inisialisasi Supabase di dalam sini
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Variabel lingkungan Supabase tidak ditemukan di Vercel');
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Ambil data dari body
     const { nama, wa, tanggal, jam } = req.body;
 
-    // Simpan ke Supabase
-    const { error } = await supabase
+    // --- 1. LOGIKA CEK JADWAL BENTROK ---
+    const { data: existing, error: checkError } = await supabase
       .from('bookings')
-      .insert([
-        { 
-          client_name: nama, 
-          client_wa: wa, 
-          booking_date: tanggal, 
-          booking_time: jam 
-        }
-      ]);
+      .select('*')
+      .eq('booking_date', tanggal)
+      .eq('booking_time', jam);
 
-    if (error) throw error;
+    if (checkError) throw checkError;
+    
+    // Jika data sudah ada, kirim error ke user
+    if (existing && existing.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Maaf, jam tersebut sudah dipesan orang lain. Silakan pilih jam lain.' 
+      });
+    }
+
+    // --- 2. SIMPAN KE DATABASE ---
+    const { error: insertError } = await supabase
+      .from('bookings')
+      .insert([{ client_name: nama, client_wa: wa, booking_date: tanggal, booking_time: jam }]);
+
+    if (insertError) throw insertError;
+
+    // --- 3. KIRIM WHATSAPP (FONNTE) ---
+    if (process.env.WA_TOKEN) {
+      await fetch('https://api.fonnte.com/send', {
+        method: 'POST',
+        headers: { 'Authorization': process.env.WA_TOKEN },
+        body: new URLSearchParams({
+          target: wa,
+          message: `*RESERVASI THE OASIS*\nHalo ${nama},\n\nJadwal Anda pada tanggal *${tanggal}* jam *${jam}* telah kami terima.\n\nSampai jumpa di The Oasis Spa!`
+        })
+      });
+    }
 
     return res.status(200).json({ success: true });
 
   } catch (err) {
-    console.error('Error:', err.message);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Server Crash: ' + err.message 
-    });
+    return res.status(500).json({ success: false, message: 'Server Error: ' + err.message });
   }
 };
