@@ -31,8 +31,8 @@ module.exports = async (req, res) => {
 
     // 3. LOGIKA OTOMATISASI WHATSAPP
     if (process.env.WA_TOKEN) {
-      // A. Pesan Konfirmasi (Langsung)
-await sendWhatsApp(wa, `🌿 *KONFIRMASI THE OASIS* 🌿\n\nHalo ${nama} 😊\nReservasi Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami dengan senang hati menantikan kehadiran Anda. Sampai jumpa di The Oasis ✨`);
+     // A. Pesan Konfirmasi (Langsung)
+await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
       // B. Reminder 1 Jam Sebelum
       // Menghitung waktu kirim: Waktu booking dikurangi 1 jam
