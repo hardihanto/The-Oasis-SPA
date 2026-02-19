@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE OASIS | Private Sanctuary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital@1&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
+        .font-luxury { font-family: 'Bodoni Moda', serif; }
+        .gold-bg { background: linear-gradient(to right, #bf953f, #fcf6ba, #aa771c); }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+    <div class="max-w-md w-full text-center space-y-12">
+        <h1 class="font-luxury text-6xl italic text-[#A68942]">The Oasis</h1>
+        <p class="text-[10px] tracking-[0.5em] uppercase opacity-50">Private Ritual Booking</p>
+        
+        <div class="space-y-6 text-left bg-zinc-900/50 p-8 rounded-2xl border border-white/5">
+            <div>
+                <label class="text-[10px] uppercase tracking-widest opacity-40">Nama Tamu</label>
+                <input type="text" id="nama" class="w-full bg-black border border-white/10 p-4 mt-2 outline-none focus:border-[#A68942]">
+            </div>
+            <div>
+                <label class="text-[10px] uppercase tracking-widest opacity-40">WhatsApp (Contoh: 0812...)</label>
+                <input type="tel" id="wa" class="w-full bg-black border border-white/10 p-4 mt-2 outline-none focus:border-[#A68942]">
+            </div>
+            <button onclick="bookingSekarang()" class="w-full gold-bg text-black font-bold py-5 tracking-[0.3em] uppercase text-xs hover:scale-105 transition duration-500">
+                Amankan Slot Ritual
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function bookingSekarang() {
+            const nama = document.getElementById('nama').value;
+            const wa = document.getElementById('wa').value;
+            if(!nama || !wa) return alert('Mohon lengkapi data Anda.');
+            
+            // Link ini akan otomatis mengirim pesan ke WA Anda (owner) 
+            // Sebagai prototipe awal sebelum kita pasang sistem otomatis penuh
+            const pesan = `Halo The Oasis, saya ${nama} ingin pesan slot ritual. Mohon info ketersediaan.`;
+            window.open(`https://wa.me/6281929009212?text=${encodeURIComponent(pesan)}`, '_blank');
+        }
+    </script>
+</body>
+</html>
