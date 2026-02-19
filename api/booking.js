@@ -23,41 +23,34 @@ module.exports = async (req, res) => {
       // A. Pesan Konfirmasi (Langsung)
 await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
-      // B. Pecah tanggal dan jam untuk perhitungan manual (WIB)
-      const [year, month, day] = tanggal.split('-').map(Number);
-      const [hour, minute] = jam.split(':').map(Number);
+      // B. Perhitungan Waktu dengan Koreksi UTC ke WIB (-7 Jam)
+      const bookingDate = new Date(`${tanggal}T${jam}:00`);
       
-      // Buat objek waktu booking dalam konteks waktu lokal
-      const bookingDate = new Date(year, month - 1, day, hour, minute);
+      // Reminder 1 Jam Sebelum: (Booking - 1 jam) - 7 jam koreksi UTC
+      const reminderTime = new Date(bookingDate.getTime() - (8 * 60 * 60 * 1000)); 
 
-      // C. Reminder 1 Jam Sebelum
-      const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
-      if (reminderTime > new Date()) {
-        await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
+      // Follow Up 7 Hari: (Booking + 7 hari) - 7 jam koreksi UTC
+      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000) - (7 * 60 * 60 * 1000));
+
+      // Kirim ke Fonnte
+      if (reminderTime > new Date(new Date().getTime() - (7 * 60 * 60 * 1000))) {
+          await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
       }
-
-      // D. Follow Up 7 Hari Setelah
-      const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
-      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan. Sampai jumpa kembali!`, followUpTime);
+      
+      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTime);
     }
 
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
-  }
-};
+// ... (bagian bawah script tetap sama)
 
-// FUNGSI PENGIRIMAN DENGAN FORMAT TANGGAL MANUAL (MENCEGAH SELISIH 7 JAM)
-async function sendWhatsApp(target, message, scheduleDate = null) {
+async function sendWhatsApp(target, message, scheduleTime = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
   
-  if (scheduleDate) {
-    // MENGGUNAKAN UNIX TIMESTAMP (DETIK)
-    // Ini adalah cara paling akurat untuk mengirim jadwal ke Fonnte
-    const unixTimestamp = Math.floor(scheduleDate.getTime() / 1000);
-    formData.append('schedule', unixTimestamp); 
+  if (scheduleTime) {
+    // Gunakan format ISO yang sudah dimodifikasi untuk Fonnte
+    const formattedDate = scheduleTime.toISOString().replace('T', ' ').substring(0, 19);
+    formData.append('schedule', formattedDate);
   }
 
   await fetch('https://api.fonnte.com/send', {
