@@ -141,21 +141,32 @@
                     <p class="text-[10px] tracking-widest opacity-40 uppercase">Hanya tersedia 3 janji temu eksklusif setiap harinya.</p>
                 </div>
                 
-                <form class="text-left space-y-10">
-                    <div class="relative border-b border-white/10 py-3 focus-within:border-[#bf953f] transition duration-500">
-                        <label class="text-[9px] uppercase tracking-[0.4em] text-[#bf953f] mb-2 block font-bold">Nama Lengkap</label>
-                        <input type="text" id="nama" class="w-full bg-transparent outline-none text-lg font-light" placeholder="Tamu Kehormatan">
-                    </div>
-                    <div class="relative border-b border-white/10 py-3 focus-within:border-[#bf953f] transition duration-500">
-                        <label class="text-[9px] uppercase tracking-[0.4em] text-[#bf953f] mb-2 block font-bold">WhatsApp Aktif</label>
-                        <input type="tel" id="wa" class="w-full bg-transparent outline-none text-lg font-light" placeholder="0812...">
-                    </div>
-                    <div class="pt-6">
-                        <button type="button" onclick="bookingSekarang()" class="w-full bg-white text-black py-6 text-[10px] uppercase tracking-[0.6em] font-bold hover:bg-[#bf953f] hover:text-white transition-all duration-700">
-                            Request Appointment
-                        </button>
-                    </div>
-                </form>
+                <form class="text-left space-y-6">
+    <div class="group relative border-b border-white/10 py-2 focus-within:border-[#bf953f] transition">
+        <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f] mb-1 block">Nama Lengkap</label>
+        <input type="text" id="nama" class="w-full bg-transparent outline-none py-2 font-light text-white" placeholder="Nama Anda">
+    </div>
+    
+    <div class="group relative border-b border-white/10 py-2 focus-within:border-[#bf953f] transition">
+        <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f] mb-1 block">WhatsApp</label>
+        <input type="tel" id="wa" class="w-full bg-transparent outline-none py-2 font-light text-white" placeholder="0812...">
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div class="group relative border-b border-white/10 py-2 focus-within:border-[#bf953f] transition">
+            <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f] mb-1 block">Pilih Tanggal</label>
+            <input type="date" id="tanggal" class="w-full bg-transparent outline-none py-2 font-light text-white [color-scheme:dark]">
+        </div>
+        <div class="group relative border-b border-white/10 py-2 focus-within:border-[#bf953f] transition">
+            <label class="text-[9px] uppercase tracking-[0.3em] text-[#bf953f] mb-1 block">Pilih Jam</label>
+            <input type="time" id="jam" class="w-full bg-transparent outline-none py-2 font-light text-white [color-scheme:dark]">
+        </div>
+    </div>
+
+    <button type="button" onclick="bookingSekarang()" class="w-full bg-white text-black py-5 text-[10px] uppercase tracking-[0.5em] font-bold hover:bg-[#bf953f] hover:text-white transition duration-500 shadow-xl">
+        Konfirmasi Reservasi
+    </button>
+</form>
             </div>
         </div>
     </section>
