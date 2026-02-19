@@ -20,21 +20,21 @@ module.exports = async (req, res) => {
 
     // 2. Logika WhatsApp
     if (process.env.WA_TOKEN) {
-      // A. Pesan Konfirmasi (Langsung)
+     // A. Pesan Konfirmasi (Langsung)
 await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo ${nama} 😊\nReservasi perawatan Spa Anda pada tanggal ${tanggal} pukul ${jam} telah berhasil dikonfirmasi ✅\n\nKami siap menyambut Anda untuk pengalaman relaksasi terbaik. Sampai jumpa dan nikmati momen istimewa Anda ✨`);
 
-     // B. Buat objek waktu booking (WIB)
+      // B. Buat objek waktu (Tambahkan +07:00 agar Vercel tahu ini WIB)
       const bookingDate = new Date(`${tanggal}T${jam}:00+07:00`);
 
-      // C. Reminder 1 Jam Sebelum
+      // C. Reminder 1 Jam Sebelum (Booking minus 1 jam)
       const reminderTime = new Date(bookingDate.getTime() - (60 * 60 * 1000));
       if (reminderTime > new Date()) {
         await sendWhatsApp(wa, `*REMINDER THE OASIS*\nHalo ${nama}, 1 jam lagi jadwal treatment Anda dimulai. Kami tunggu kedatangannya!`, reminderTime);
       }
 
-      // D. Follow Up 7 Hari Setelah
+      // D. Follow Up 7 Hari Setelah (Booking plus 7 hari)
       const followUpTime = new Date(bookingDate.getTime() + (7 * 24 * 60 * 60 * 1000));
-      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan.`, followUpTime);
+      await sendWhatsApp(wa, `*GREETINGS THE OASIS*\nHalo ${nama}, sudah 1 minggu sejak kunjungan Anda. Semoga pelayanan kami memuaskan. Sampai jumpa kembali!`, followUpTime);
     }
 
     return res.status(200).json({ success: true });
@@ -43,21 +43,24 @@ await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo $
   }
 };
 
-async function sendWhatsApp(target, message, scheduleTime = null) {
+// FUNGSI KIRIM FONNTE DENGAN FORMAT TANGGAL MANUAL (WIB)
+async function sendWhatsApp(target, message, scheduleDate = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
-  
-  if (scheduleTime) {
-    // FORMAT TANGGAL YANG PASTI DITERIMA FONNTE SEBAGAI WIB
-    const year = scheduleTime.toLocaleString("en-ID", {year: 'numeric', timeZone: "Asia/Jakarta"});
-    const month = scheduleTime.toLocaleString("en-ID", {month: '2-digit', timeZone: "Asia/Jakarta"});
-    const day = scheduleTime.toLocaleString("en-ID", {day: '2-digit', timeZone: "Asia/Jakarta"});
-    const hour = scheduleTime.toLocaleString("en-ID", {hour: '2-digit', hour12: false, timeZone: "Asia/Jakarta"});
-    const minute = scheduleTime.toLocaleString("en-ID", {minute: '2-digit', timeZone: "Asia/Jakarta"});
+
+  if (scheduleDate) {
+    // Kita ambil waktu Jakarta dengan menambahkan offset secara manual jika perlu, 
+    // tapi cara paling aman di Vercel adalah toLocaleString dengan format ISO
+    const jktDate = new Date(scheduleDate.toLocaleString("en-US", {timeZone: "Asia/Jakarta"}));
     
-    // Hasilnya: YYYY-MM-DD HH:mm:00
-    const formattedDate = `${year}-${month}-${day} ${hour}:${minute}:00`;
+    const Y = jktDate.getFullYear();
+    const M = String(jktDate.getMonth() + 1).padStart(2, '0');
+    const D = String(jktDate.getDate()).padStart(2, '0');
+    const h = String(jktDate.getHours()).padStart(2, '0');
+    const m = String(jktDate.getMinutes()).padStart(2, '0');
+    
+    const formattedDate = `${Y}-${M}-${D} ${h}:${m}:00`;
     formData.append('schedule', formattedDate);
   }
 
