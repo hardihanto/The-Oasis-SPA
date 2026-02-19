@@ -1,37 +1,31 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// Inisialisasi Supabase di luar handler agar performa lebih cepat
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 module.exports = async (req, res) => {
-  // Tambahkan Header CORS agar browser tidak memblokir koneksi
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  // 1. Tambahkan Header CORS agar browser tidak menolak akses
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // 2. Tangani Preflight Request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Gunakan metode POST untuk melakukan booking' });
+    return res.status(405).json({ message: 'Hanya menerima POST request' });
   }
 
   try {
-    // Vercel secara otomatis memproses req.body menjadi objek JSON
-    const { nama, wa, tanggal, jam } = req.body;
+    // Pastikan data yang masuk diproses dengan benar
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { nama, wa, tanggal, jam } = body;
 
-    if (!nama || !wa) {
-      return res.status(400).json({ success: false, message: 'Data nama dan WhatsApp wajib diisi' });
-    }
-
+    // Simpan ke Supabase
     const { error } = await supabase
       .from('bookings')
       .insert([
@@ -43,11 +37,14 @@ module.exports = async (req, res) => {
         }
       ]);
 
-    if (error) throw error;
+    if (error) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
 
     return res.status(200).json({ success: true });
 
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Server Crash: ' + err.message });
+    console.error('Crash Detail:', err.message);
+    return res.status(500).json({ success: false, message: 'Server Error: ' + err.message });
   }
 };
