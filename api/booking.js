@@ -48,22 +48,16 @@ await sendWhatsApp(wa, `🌸 *KONFIRMASI RESERVASI SPA THE OASIS* 🌸\n\nHalo $
 };
 
 // FUNGSI PENGIRIMAN DENGAN FORMAT TANGGAL MANUAL (MENCEGAH SELISIH 7 JAM)
-async function sendWhatsApp(target, message, scheduleTime = null) {
+async function sendWhatsApp(target, message, scheduleDate = null) {
   const formData = new URLSearchParams();
   formData.append('target', target);
   formData.append('message', message);
-
-  if (scheduleTime) {
-    // Susun format YYYY-MM-DD HH:MM:SS secara manual agar sesuai jam Jakarta
-    const Y = scheduleTime.getFullYear();
-    const M = String(scheduleTime.getMonth() + 1).padStart(2, '0');
-    const D = String(scheduleTime.getDate()).padStart(2, '0');
-    const h = String(scheduleTime.getHours()).padStart(2, '0');
-    const m = String(scheduleTime.getMinutes()).padStart(2, '0');
-    const s = "00";
-    
-    const formattedDate = `${Y}-${M}-${D} ${h}:${m}:${s}`;
-    formData.append('schedule', formattedDate);
+  
+  if (scheduleDate) {
+    // MENGGUNAKAN UNIX TIMESTAMP (DETIK)
+    // Ini adalah cara paling akurat untuk mengirim jadwal ke Fonnte
+    const unixTimestamp = Math.floor(scheduleDate.getTime() / 1000);
+    formData.append('schedule', unixTimestamp); 
   }
 
   await fetch('https://api.fonnte.com/send', {
