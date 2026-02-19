@@ -1,13 +1,13 @@
 const { createClient } = require('@supabase/supabase-js');
 
-// Inisialisasi Supabase di luar handler agar lebih cepat
+// Inisialisasi Supabase di luar handler agar performa lebih cepat
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 module.exports = async (req, res) => {
-  // Tambahkan Header CORS agar diizinkan oleh browser
+  // Tambahkan Header CORS agar browser tidak memblokir koneksi
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -21,15 +21,15 @@ module.exports = async (req, res) => {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Gunakan metode POST' });
+    return res.status(405).json({ message: 'Gunakan metode POST untuk melakukan booking' });
   }
 
   try {
-    // Pastikan req.body sudah berupa objek (Vercel biasanya otomatis memprosesnya)
-    const { nama, wa, tanggal, jam } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    // Vercel secara otomatis memproses req.body menjadi objek JSON
+    const { nama, wa, tanggal, jam } = req.body;
 
     if (!nama || !wa) {
-      return res.status(400).json({ message: 'Nama dan WA wajib diisi' });
+      return res.status(400).json({ success: false, message: 'Data nama dan WhatsApp wajib diisi' });
     }
 
     const { error } = await supabase
@@ -48,7 +48,6 @@ module.exports = async (req, res) => {
     return res.status(200).json({ success: true });
 
   } catch (err) {
-    console.error('Error detail:', err.message);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({ success: false, message: 'Server Crash: ' + err.message });
   }
 };
